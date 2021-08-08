@@ -1,0 +1,190 @@
+' SCCcoil
+
+Sub Main ()
+
+With Material
+     .Reset
+     .Name "Copper (pure)"
+     .Folder ""
+.FrqType "all"
+.Type "Lossy metal"
+.MaterialUnit "Frequency", "GHz"
+.MaterialUnit "Geometry", "mm"
+.MaterialUnit "Time", "s"
+.MaterialUnit "Temperature", "Kelvin"
+.Mu "1.0"
+.Sigma "5.96e+007"
+.Rho "8930.0"
+.ThermalType "Normal"
+.ThermalConductivity "401.0"
+.HeatCapacity "0.39"
+.MetabolicRate "0"
+.BloodFlow "0"
+.VoxelConvection "0"
+.MechanicsType "Isotropic"
+.YoungsModulus "120"
+.PoissonsRatio "0.33"
+.ThermalExpansionRate "17"
+.ReferenceCoordSystem "Global"
+.CoordSystemType "Cartesian"
+.NLAnisotropy "False"
+.NLAStackingFactor "1"
+.NLADirectionX "1"
+.NLADirectionY "0"
+.NLADirectionZ "0"
+.FrqType "static"
+.Type "Normal"
+.SetMaterialUnit "Hz", "mm"
+.Epsilon "1"
+.Mu "1.0"
+.Kappa "5.96e+007"
+.TanD "0.0"
+.TanDFreq "0.0"
+.TanDGiven "False"
+.TanDModel "ConstTanD"
+.KappaM "0"
+.TanDM "0.0"
+.TanDMFreq "0.0"
+.TanDMGiven "False"
+.TanDMModel "ConstTanD"
+.DispModelEps "None"
+.DispModelMu "None"
+.DispersiveFittingSchemeEps "Nth Order"
+.DispersiveFittingSchemeMu "Nth Order"
+.UseGeneralDispersionEps "False"
+.UseGeneralDispersionMu "False"
+.Colour "1", "1", "0"
+.Wireframe "False"
+.Reflection "False"
+.Allowoutline "True"
+.Transparentoutline "False"
+.Transparency "0"
+.Create
+End With
+
+With Material
+     .Reset
+     .Name "PTFE (lossy)"
+     .Folder ""
+.FrqType "all"
+.Type "Normal"
+.SetMaterialUnit "GHz", "mm"
+.Epsilon "2.1"
+.Mu "1.0"
+.Kappa "0.0"
+.TanD "0.0002"
+.TanDFreq "10.0"
+.TanDGiven "True"
+.TanDModel "ConstTanD"
+.KappaM "0.0"
+.TanDM "0.0"
+.TanDMFreq "0.0"
+.TanDMGiven "False"
+.TanDMModel "ConstKappa"
+.DispModelEps "None"
+.DispModelMu "None"
+.DispersiveFittingSchemeEps "General 1st"
+.DispersiveFittingSchemeMu "General 1st"
+.UseGeneralDispersionEps "False"
+.UseGeneralDispersionMu "False"
+.Rho "2200.0"
+.ThermalType "Normal"
+.ThermalConductivity "0.2"
+.HeatCapacity "1.0"
+.SetActiveMaterial "all"
+.MechanicsType "Isotropic"
+.YoungsModulus "0.5"
+.PoissonsRatio "0.4"
+.ThermalExpansionRate "140"
+.Colour "0.94", "0.82", "0.76"
+.Wireframe "False"
+.Transparency "0"
+.Create
+End With
+
+Component.New "SCCcoil"
+
+With Torus
+     .Reset
+     .Name "innerloop"
+     .Component "SCCcoil"
+     .Material "Copper (pure)"
+     .OuterRadius "R+r1"
+     .InnerRadius "R-r1"
+     .Axis "z"
+     .Xcenter "0"
+     .Ycenter "0"
+     .Zcenter "0"
+     .Segments "0"
+     .Create
+End With
+
+With Torus
+     .Reset
+     .Name "dielectric"
+     .Component "SCCcoil"
+     .Material "PTFE (lossy)"
+     .OuterRadius "R+r2"
+     .InnerRadius "R-r2"
+     .Axis "z"
+     .Xcenter "0"
+     .Ycenter "0"
+     .Zcenter "0"
+     .Segments "0"
+     .Create
+End With
+
+Solid.Insert "SCCcoil:dielectric", "SCCcoil:innerloop"
+
+With Torus
+     .Reset
+     .Name "outerloop"
+     .Component "SCCcoil"
+     .Material "Copper (pure)"
+     .OuterRadius "R+r3"
+     .InnerRadius "R-r3"
+     .Axis "z"
+     .Xcenter "0"
+     .Ycenter "0"
+     .Zcenter "0"
+     .Segments "0"
+     .Create
+End With
+
+Solid.Insert "SCCcoil:outerloop", "SCCcoil:dielectric"
+Solid.Insert "SCCcoil:outerloop", "SCCcoil:innerloop"
+
+' gaps
+With Brick
+     .Reset
+     .Name "gap2"
+     .Component "SCCcoil"
+     .Material "Copper (pure)"
+     .Xrange "-0.5", "0.5"
+     .Yrange "-R-5", "-R+5"
+     .Zrange "-5", "5"
+     .Create
+End With
+With Transform
+     .Reset
+     .Name "SCCcoil:gap2"
+     .Vector "0", "2*R", "0"
+     .UsePickedPoints "False"
+     .InvertPickedPoints "False"
+     .MultipleObjects "True"
+     .GroupObjects "False"
+     .Repetitions "1"
+     .MultipleSelection "False"
+     .Destination ""
+     .Material ""
+     .Transform "Shape", "Translate"
+End With
+
+Solid.Insert "SCCcoil:innerloop", "SCCcoil:gap2"
+Solid.Insert "SCCcoil:outerloop", "SCCcoil:gap2_1"
+Solid.Insert "SCCcoil:dielectric", "SCCcoil:gap2"
+Solid.Insert "SCCcoil:dielectric", "SCCcoil:gap2_1"
+Solid.Delete "SCCcoil:gap2"
+Solid.Delete "SCCcoil:gap2_1"
+
+End Sub
